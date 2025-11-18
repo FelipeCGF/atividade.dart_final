@@ -11,13 +11,14 @@ class MyHomePage extends StatelessWidget {
       body: Center(
         child: Container(
           width: 300,
-          height: 600,
+
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(40),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
           child: Column(
+            mainAxisSize: MainAxisSize.min, 
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
