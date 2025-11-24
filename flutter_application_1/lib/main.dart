@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'view/home_page.dart';
+import 'view/telaprincipal.dart';
+import 'view/tela2_dart';
+import 'view/finance_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +14,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: "FinPlan"),
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const MyHomePage(title: "FinPlan"),
+        '/bank': (_) => const BankOverviewScreen(),
+        '/finance': (_) => const FinanceScreen(),
+      },
     );
   }
 }
