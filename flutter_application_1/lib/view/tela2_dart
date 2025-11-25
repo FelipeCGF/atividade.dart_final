@@ -8,7 +8,7 @@ class BankOverviewScreen extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.black, // Fundo preto mantido
+      backgroundColor: Colors.black, 
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -39,7 +39,7 @@ class BankOverviewScreen extends StatelessWidget {
 class _TopCard extends StatelessWidget {
   const _TopCard({Key? key}) : super(key: key);
 
-  // --- NOVA FUNÇÃO DE NOTIFICAÇÕES ---
+  
   void _showNotifications(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -68,7 +68,7 @@ class _TopCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              // Lista fixa de notificações para demonstração
+              
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
@@ -133,7 +133,7 @@ class _TopCard extends StatelessWidget {
                 splashRadius: 20,
               ),
               IconButton(
-                // O botão agora chama a função _showNotifications
+                
                 onPressed: () => _showNotifications(context),
                 icon: const Icon(Icons.notifications_none, color: Colors.white70),
                 splashRadius: 20,
@@ -359,7 +359,7 @@ class _TransactionTile extends StatelessWidget {
   }
 }
 
-// --- NOVO WIDGET DE ITEM DE NOTIFICAÇÃO ---
+
 class _NotificationItem extends StatelessWidget {
   final String title;
   final String subtitle;
