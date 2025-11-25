@@ -8,7 +8,7 @@ class BankOverviewScreen extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.black, 
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -39,7 +39,7 @@ class BankOverviewScreen extends StatelessWidget {
 class _TopCard extends StatelessWidget {
   const _TopCard({Key? key}) : super(key: key);
 
-  
+  // --- FUNÇÃO DE NOTIFICAÇÕES (Atualizada com Cores) ---
   void _showNotifications(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -68,7 +68,7 @@ class _TopCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              
+              // Lista de notificações com as Cores Padrão
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
@@ -77,29 +77,29 @@ class _TopCard extends StatelessWidget {
                       title: "Depósito Recebido",
                       subtitle: "Pix de João Silva",
                       amount: "+ R\$ 1.200,00",
-                      isIncome: true,
-                      time: "Hoje, 10:30",
+                      icon: Icons.arrow_downward, // Entrada
+                      color: Color(0xFF2DBF6A), // Verde
                     ),
                     _NotificationItem(
                       title: "Compra Aprovada",
                       subtitle: "Supermercado Extra",
                       amount: "- R\$ 450,20",
-                      isIncome: false,
-                      time: "Ontem, 19:15",
+                      icon: Icons.restaurant, // Ícone de comida
+                      color: Color(0xFF2DBF6A), // Verde (Igual ao card de Comida)
                     ),
                     _NotificationItem(
                       title: "Pagamento de Boleto",
                       subtitle: "Internet Fibra",
                       amount: "- R\$ 120,90",
-                      isIncome: false,
-                      time: "Ontem, 08:00",
+                      icon: Icons.bolt, // Ícone de serviço
+                      color: Color(0xFFCCB3E6), // Roxo (Igual ao card de Transporte)
                     ),
                     _NotificationItem(
                       title: "Cashback",
                       subtitle: "Bonus da fatura",
                       amount: "+ R\$ 12,50",
-                      isIncome: true,
-                      time: "22/10, 14:00",
+                      icon: Icons.local_offer,
+                      color: Color(0xFF2DBF6A), // Verde
                     ),
                   ],
                 ),
@@ -133,7 +133,6 @@ class _TopCard extends StatelessWidget {
                 splashRadius: 20,
               ),
               IconButton(
-                
                 onPressed: () => _showNotifications(context),
                 icon: const Icon(Icons.notifications_none, color: Colors.white70),
                 splashRadius: 20,
@@ -142,14 +141,14 @@ class _TopCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text('Seu saldo', style: TextStyle(color: Colors.white70, fontSize: 16)),
-          const SizedBox(height: 6),
           const Text('R\$ 2.453,68', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, letterSpacing: 1.2)),
           const SizedBox(height: 18),
           Row(
             children: [
-              Expanded(child: _YellowButton(icon: Icons.north_east, label: 'Retirar')),
+              // ALTERAÇÃO: Botões mudaram para conversão de moeda (Euro e Dólar)
+              Expanded(child: _YellowButton(icon: Icons.euro, label: 'Euro')),
               const SizedBox(width: 12),
-              Expanded(child: _YellowButton(icon: Icons.call_made, label: 'Depósito')),
+              Expanded(child: _YellowButton(icon: Icons.attach_money, label: 'Dólar')),
             ],
           ),
         ],
@@ -359,20 +358,21 @@ class _TransactionTile extends StatelessWidget {
   }
 }
 
-
+// --- WIDGET DE NOTIFICAÇÃO ATUALIZADO ---
+// Agora aceita uma cor (color) e ícone (icon) específicos para personalizar
 class _NotificationItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final String amount;
-  final String time;
-  final bool isIncome;
+  final IconData icon;
+  final Color color; // Cor personalizada
 
   const _NotificationItem({
     required this.title,
     required this.subtitle,
     required this.amount,
-    required this.time,
-    required this.isIncome,
+    required this.icon,
+    required this.color,
   });
 
   @override
@@ -384,12 +384,14 @@ class _NotificationItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isIncome ? const Color(0xFF2DBF6A).withOpacity(0.2) : Colors.white10,
+              // Usamos a cor passada (igual a dos cards)
+              color: color, 
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isIncome ? const Color(0xFF2DBF6A) : Colors.white70,
+              icon,
+              // Ícone preto ou cinza escuro para dar contraste no verde/roxo pastel
+              color: Colors.black54, 
               size: 20,
             ),
           ),
@@ -400,14 +402,15 @@ class _NotificationItem extends StatelessWidget {
               children: [
                 Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
                 const SizedBox(height: 4),
-                Text("$subtitle • $time", style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 12)),
               ],
             ),
           ),
           Text(
             amount,
             style: TextStyle(
-              color: isIncome ? const Color(0xFF2DBF6A) : Colors.white,
+              // O texto do valor segue a cor do ícone para combinar
+              color: color,
               fontWeight: FontWeight.bold,
             ),
           ),
