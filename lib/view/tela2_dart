@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert'; // Necessário para ler os dados da API
+import 'package:http/http.dart' as http; // Necessário para conectar na internet
 
 class BankOverviewScreen extends StatelessWidget {
   const BankOverviewScreen({super.key});
@@ -20,6 +22,7 @@ class BankOverviewScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
+                    // O TopCard agora gerencia a conversão de moedas
                     const _TopCard(),
                     const SizedBox(height: 20),
                     const _CardsStack(),
@@ -36,10 +39,106 @@ class BankOverviewScreen extends StatelessWidget {
   }
 }
 
-class _TopCard extends StatelessWidget {
+// Transformamos em StatefulWidget para o valor poder mudar na tela ao clicar
+class _TopCard extends StatefulWidget {
   const _TopCard({Key? key}) : super(key: key);
 
-  // --- FUNÇÃO DE NOTIFICAÇÕES (Atualizada com Cores) ---
+  @override
+  State<_TopCard> createState() => _TopCardState();
+}
+
+class _TopCardState extends State<_TopCard> {
+  // CONFIGURAÇÃO: Seu saldo inicial em Reais
+  final double _originalBalanceBRL = 2453.68;
+  
+  // Variáveis de controle
+  late String _displayBalance;
+  String _currencySymbol = "R\$";
+  bool _isLoading = false; // Controla o "girando" de carregamento
+
+  @override
+  void initState() {
+    super.initState();
+    _resetToBRL(); // Começa sempre em Real
+  }
+
+  // Função para voltar ao saldo original
+  void _resetToBRL() {
+    setState(() {
+      _displayBalance = _formatValue(_originalBalanceBRL);
+      _currencySymbol = "R\$";
+    });
+  }
+
+  // Formata o número (troca ponto por vírgula para ficar padrão BR)
+  String _formatValue(double value) {
+    return value.toStringAsFixed(2).replaceAll('.', ',');
+  }
+
+  // --- LÓGICA DA API ---
+  Future<void> _convertCurrency(String targetCurrency) async {
+    // Se clicar na mesma moeda que já está, volta para Real
+    if ((targetCurrency == "USD" && _currencySymbol == "\$") || 
+        (targetCurrency == "EUR" && _currencySymbol == "€")) {
+      _resetToBRL();
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // Inicia o carregamento na tela
+    });
+
+    try {
+      // 1. URL da API Grátis
+      final url = Uri.parse('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
+      
+      // 2. Faz o pedido para a internet
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // 3. Lê a resposta
+        final data = json.decode(response.body);
+        
+        double rate = 1.0;
+        String symbol = "";
+
+        // 4. Pega a cotação correta
+        if (targetCurrency == "USD") {
+          rate = double.parse(data['USDBRL']['bid']); // Cotação Dólar
+          symbol = "\$";
+        } else if (targetCurrency == "EUR") {
+          rate = double.parse(data['EURBRL']['bid']); // Cotação Euro
+          symbol = "€";
+        }
+
+        // 5. Calcula: Saldo em Reais dividido pela Cotação
+        double convertedValue = _originalBalanceBRL / rate;
+
+        // 6. Atualiza a tela
+        setState(() {
+          _displayBalance = _formatValue(convertedValue);
+          _currencySymbol = symbol;
+        });
+      } else {
+        throw Exception('Erro na API');
+      }
+    } catch (e) {
+      // Se der erro (sem internet), avisa e volta pro Real
+      print("Erro: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erro de conexão. Verifique sua internet.")),
+      );
+      _resetToBRL();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false; // Para o carregamento
+        });
+      }
+    }
+  }
+
+  // Função do BottomSheet de Notificações
   void _showNotifications(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -68,39 +167,14 @@ class _TopCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              // Lista de notificações com as Cores Padrão
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
                   children: const [
-                    _NotificationItem(
-                      title: "Depósito Recebido",
-                      subtitle: "Pix de João Silva",
-                      amount: "+ R\$ 1.200,00",
-                      icon: Icons.arrow_downward, // Entrada
-                      color: Color(0xFF2DBF6A), // Verde
-                    ),
-                    _NotificationItem(
-                      title: "Compra Aprovada",
-                      subtitle: "Supermercado Extra",
-                      amount: "- R\$ 450,20",
-                      icon: Icons.restaurant, // Ícone de comida
-                      color: Color(0xFF2DBF6A), // Verde (Igual ao card de Comida)
-                    ),
-                    _NotificationItem(
-                      title: "Pagamento de Boleto",
-                      subtitle: "Internet Fibra",
-                      amount: "- R\$ 120,90",
-                      icon: Icons.bolt, // Ícone de serviço
-                      color: Color(0xFFCCB3E6), // Roxo (Igual ao card de Transporte)
-                    ),
-                    _NotificationItem(
-                      title: "Cashback",
-                      subtitle: "Bonus da fatura",
-                      amount: "+ R\$ 12,50",
-                      icon: Icons.local_offer,
-                      color: Color(0xFF2DBF6A), // Verde
-                    ),
+                    _NotificationItem(title: "Depósito Recebido", subtitle: "Pix de João Silva", amount: "+ R\$ 1.200,00", icon: Icons.arrow_downward, color: Color(0xFF2DBF6A)),
+                    _NotificationItem(title: "Compra Aprovada", subtitle: "Supermercado Extra", amount: "- R\$ 450,20", icon: Icons.restaurant, color: Color(0xFF2DBF6A)),
+                    _NotificationItem(title: "Pagamento de Boleto", subtitle: "Internet Fibra", amount: "- R\$ 120,90", icon: Icons.bolt, color: Color(0xFFCCB3E6)),
+                    _NotificationItem(title: "Cashback", subtitle: "Bonus da fatura", amount: "+ R\$ 12,50", icon: Icons.local_offer, color: Color(0xFF2DBF6A)),
                   ],
                 ),
               ),
@@ -126,9 +200,7 @@ class _TopCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/finance');
-                },
+                onPressed: () => Navigator.pushNamed(context, '/finance'),
                 icon: const Icon(Icons.menu, color: Colors.white70),
                 splashRadius: 20,
               ),
@@ -141,14 +213,42 @@ class _TopCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text('Seu saldo', style: TextStyle(color: Colors.white70, fontSize: 16)),
-          const Text('R\$ 2.453,68', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, letterSpacing: 1.2)),
+          const SizedBox(height: 6),
+          
+          // MOSTRADOR DE SALDO (Com Loading)
+          _isLoading 
+            ? const SizedBox(
+                height: 48,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Color(0xFFF3C300), strokeWidth: 2)),
+                ),
+              )
+            : Text(
+                '$_currencySymbol $_displayBalance', 
+                style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500, letterSpacing: 1.2)
+              ),
+          
           const SizedBox(height: 18),
           Row(
             children: [
-              // ALTERAÇÃO: Botões mudaram para conversão de moeda (Euro e Dólar)
-              Expanded(child: _YellowButton(icon: Icons.euro, label: 'Euro')),
+              Expanded(
+                child: _YellowButton(
+                  icon: Icons.euro, 
+                  label: 'Euro', 
+                  // AO CLICAR: Chama a função da API
+                  onTap: () => _convertCurrency("EUR"), 
+                )
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _YellowButton(icon: Icons.attach_money, label: 'Dólar')),
+              Expanded(
+                child: _YellowButton(
+                  icon: Icons.attach_money, 
+                  label: 'Dólar', 
+                  // AO CLICAR: Chama a função da API
+                  onTap: () => _convertCurrency("USD"), 
+                )
+              ),
             ],
           ),
         ],
@@ -157,10 +257,18 @@ class _TopCard extends StatelessWidget {
   }
 }
 
+// Botão atualizado para aceitar clique
 class _YellowButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _YellowButton({required this.icon, required this.label, Key? key}) : super(key: key);
+  final VoidCallback onTap; 
+
+  const _YellowButton({
+    required this.icon, 
+    required this.label, 
+    required this.onTap,
+    Key? key
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +280,7 @@ class _YellowButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         elevation: 0,
       ),
-      onPressed: () {},
+      onPressed: onTap,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -358,14 +466,12 @@ class _TransactionTile extends StatelessWidget {
   }
 }
 
-// --- WIDGET DE NOTIFICAÇÃO ATUALIZADO ---
-// Agora aceita uma cor (color) e ícone (icon) específicos para personalizar
 class _NotificationItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final String amount;
   final IconData icon;
-  final Color color; // Cor personalizada
+  final Color color;
 
   const _NotificationItem({
     required this.title,
@@ -384,16 +490,10 @@ class _NotificationItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              // Usamos a cor passada (igual a dos cards)
               color: color, 
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              // Ícone preto ou cinza escuro para dar contraste no verde/roxo pastel
-              color: Colors.black54, 
-              size: 20,
-            ),
+            child: Icon(icon, color: Colors.black54, size: 20),
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -406,14 +506,7 @@ class _NotificationItem extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            amount,
-            style: TextStyle(
-              // O texto do valor segue a cor do ícone para combinar
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(amount, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
         ],
       ),
     );
