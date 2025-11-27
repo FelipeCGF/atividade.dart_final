@@ -413,14 +413,14 @@ class _TransactionsSection extends StatelessWidget {
         _TransactionTile(
           title: 'Comida',
           amount: '-R\$ 805,87',
-          background: const Color(0xFF2DBF6A),
+          background: const Color(0xFF7FE3AE),
           icon: Icons.restaurant,
         ),
         const SizedBox(height: 12),
         _TransactionTile(
           title: 'Transporte',
           amount: '-R\$ 353,54',
-          background: const Color(0xFFCCB3E6),
+          background: const Color(0xFFC7A8FF),
           icon: Icons.directions_car,
         ),
       ],
