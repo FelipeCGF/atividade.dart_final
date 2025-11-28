@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // Necessário para ler os dados da API
-import 'package:http/http.dart' as http; // Necessário para conectar na internet
+import 'dart:convert'; 
+import 'package:http/http.dart' as http; 
 
 class BankOverviewScreen extends StatelessWidget {
   const BankOverviewScreen({super.key});
@@ -22,7 +22,7 @@ class BankOverviewScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 8),
-                    // O TopCard agora gerencia a conversão de moedas
+
                     const _TopCard(),
                     const SizedBox(height: 20),
                     const _CardsStack(),
@@ -39,7 +39,7 @@ class BankOverviewScreen extends StatelessWidget {
   }
 }
 
-// Transformamos em StatefulWidget para o valor poder mudar na tela ao clicar
+
 class _TopCard extends StatefulWidget {
   const _TopCard({Key? key}) : super(key: key);
 
@@ -48,21 +48,21 @@ class _TopCard extends StatefulWidget {
 }
 
 class _TopCardState extends State<_TopCard> {
-  // CONFIGURAÇÃO: Seu saldo inicial em Reais
+  
   final double _originalBalanceBRL = 2453.68;
   
-  // Variáveis de controle
+  
   late String _displayBalance;
   String _currencySymbol = "R\$";
-  bool _isLoading = false; // Controla o "girando" de carregamento
+  bool _isLoading = false; 
 
   @override
   void initState() {
     super.initState();
-    _resetToBRL(); // Começa sempre em Real
+    _resetToBRL(); 
   }
 
-  // Função para voltar ao saldo original
+  
   void _resetToBRL() {
     setState(() {
       _displayBalance = _formatValue(_originalBalanceBRL);
@@ -70,14 +70,14 @@ class _TopCardState extends State<_TopCard> {
     });
   }
 
-  // Formata o número (troca ponto por vírgula para ficar padrão BR)
+  
   String _formatValue(double value) {
     return value.toStringAsFixed(2).replaceAll('.', ',');
   }
 
-  // --- LÓGICA DA API ---
+  
   Future<void> _convertCurrency(String targetCurrency) async {
-    // Se clicar na mesma moeda que já está, volta para Real
+    
     if ((targetCurrency == "USD" && _currencySymbol == "\$") || 
         (targetCurrency == "EUR" && _currencySymbol == "€")) {
       _resetToBRL();
@@ -85,36 +85,36 @@ class _TopCardState extends State<_TopCard> {
     }
 
     setState(() {
-      _isLoading = true; // Inicia o carregamento na tela
+      _isLoading = true; 
     });
 
     try {
-      // 1. URL da API Grátis
+      
       final url = Uri.parse('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
       
-      // 2. Faz o pedido para a internet
+      
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        // 3. Lê a resposta
+
         final data = json.decode(response.body);
         
         double rate = 1.0;
         String symbol = "";
 
-        // 4. Pega a cotação correta
+        
         if (targetCurrency == "USD") {
-          rate = double.parse(data['USDBRL']['bid']); // Cotação Dólar
+          rate = double.parse(data['USDBRL']['bid']); 
           symbol = "\$";
         } else if (targetCurrency == "EUR") {
-          rate = double.parse(data['EURBRL']['bid']); // Cotação Euro
+          rate = double.parse(data['EURBRL']['bid']); 
           symbol = "€";
         }
 
-        // 5. Calcula: Saldo em Reais dividido pela Cotação
+        
         double convertedValue = _originalBalanceBRL / rate;
 
-        // 6. Atualiza a tela
+        
         setState(() {
           _displayBalance = _formatValue(convertedValue);
           _currencySymbol = symbol;
@@ -123,7 +123,7 @@ class _TopCardState extends State<_TopCard> {
         throw Exception('Erro na API');
       }
     } catch (e) {
-      // Se der erro (sem internet), avisa e volta pro Real
+      
       print("Erro: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Erro de conexão. Verifique sua internet.")),
@@ -132,13 +132,13 @@ class _TopCardState extends State<_TopCard> {
     } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false; // Para o carregamento
+          _isLoading = false; 
         });
       }
     }
   }
 
-  // Função do BottomSheet de Notificações
+  
   void _showNotifications(BuildContext context) {
     showModalBottomSheet(
       context: context,
