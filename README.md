@@ -1,16 +1,43 @@
-# flutter_application_1
+# Flutter Application 1
 
-A new Flutter project.
+Este é um projeto Flutter desenvolvido para demonstrar integração com APIs externas e persistência de dados local.
 
-## Getting Started
+## 🚀 Funcionalidades
 
-This project is a starting point for a Flutter application.
+O aplicativo conta com as seguintes integrações principais:
 
-A few resources to get you started if this is your first Flutter project:
+* **Conexão com API:** Utiliza o pacote `http` para realizar requisições de rede e conectar a serviços externos.
+* **Armazenamento Local:** Utiliza o `shared_preferences` para salvar e recuperar dados diretamente no dispositivo do usuário (persistência).
+* **Assets:** Gerenciamento de imagens locais (ex: `assets/statue.png`).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📦 Tecnologias e Pacotes
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+As principais dependências definidas no `pubspec.yaml` são:
+
+* [Flutter SDK](https://flutter.dev) (versão ^3.9.2)
+* [http](https://pub.dev/packages/http)
+* [shared_preferences](https://pub.dev/packages/shared_preferences)
+* [cupertino_icons](https://pub.dev/packages/cupertino_icons)
+
+## 🛠️ Como rodar o projeto
+
+Certifique-se de ter o Flutter instalado em sua máquina.
+
+1.  **Instale as dependências:**
+    Abra o terminal na pasta raiz do projeto e execute:
+    ```bash
+    flutter pub get
+    ```
+
+2.  **Execute o aplicativo:**
+    ```bash
+    flutter run
+    ```
+
+## 📂 Estrutura de Pastas
+
+* `lib/`: Contém o código fonte principal do Dart.
+* `assets/`: Contém recursos estáticos como imagens (configurado no `pubspec.yaml`).
+
+---
+Desenvolvido com 💙 em Flutter.
