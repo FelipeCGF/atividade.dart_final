@@ -40,4 +40,4 @@ Certifique-se de ter o Flutter instalado em sua máquina.
 * `assets/`: Contém recursos estáticos como imagens (configurado no `pubspec.yaml`).
 
 ---
-Desenvolvido com 💙 em Flutter.
+Flutter.
